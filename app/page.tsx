@@ -22,7 +22,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Connect via GMeet
+            Use Boardroom Gmeet Link
           </a>
         </Button>
 
@@ -37,7 +37,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Connect via Zoom
+            Use Boardroom Zoom Link
           </a>
         </Button>
       </div>
