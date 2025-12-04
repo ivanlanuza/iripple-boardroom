@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { RefreshCcw } from "lucide-react";
 
 const GMEET_URL = "https://meet.google.com/dxf-xuav-yim";
 const ZOOM_URL =
@@ -34,27 +35,27 @@ export default function Home() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  useEffect(() => {
-    const fetchMeetings = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchMeetings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const res = await fetch("/api/meetings");
-        if (!res.ok) {
-          throw new Error("Failed to fetch meetings");
-        }
-
-        const data = await res.json();
-        setMeetings(data.meetings || []);
-      } catch (err: any) {
-        console.error(err);
-        setError("Could not load upcoming meetings.");
-      } finally {
-        setLoading(false);
+      const res = await fetch("/api/meetings");
+      if (!res.ok) {
+        throw new Error("Failed to fetch meetings");
       }
-    };
 
+      const data = await res.json();
+      setMeetings(data.meetings || []);
+    } catch (err: any) {
+      console.error(err);
+      setError("Could not load upcoming meetings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMeetings();
   }, []);
 
@@ -90,6 +91,7 @@ export default function Home() {
       <h1 className="text-3xl md:text-4xl font-semibold mb-10 text-center text-slate-50">
         Welcome to iRipple Boardroom
       </h1>
+
 
       <div className="flex flex-col md:flex-row gap-4 w-2/3 ">
         {/* GMeet */}
@@ -133,6 +135,18 @@ export default function Home() {
                 Your meeting will appear below once it&apos;s on the boardroom calendar.
               </DialogDescription>
             </DialogHeader>
+
+            <div className="mt-2 flex justify-end">
+              <Button
+                size="icon"
+                variant="outline"
+                className="border-slate-700 bg-slate-900 text-slate-50 hover:bg-slate-800 hover:text-slate-200"
+                onClick={fetchMeetings}
+                disabled={loading}
+              >
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
+            </div>
 
             <div className="mt-4 space-y-3">
               {loading && (

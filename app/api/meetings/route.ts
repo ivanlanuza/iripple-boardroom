@@ -1,22 +1,43 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
 
+export const runtime = "nodejs"; // ensure Node runtime, not Edge
+
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 
-function getJwtClient() {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+type ServiceAccountCredentials = {
+  client_email: string;
+  private_key: string;
+};
 
-  if (!clientEmail || !privateKey) {
-    throw new Error("Missing GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY env vars");
+function getServiceAccountCredentials(): ServiceAccountCredentials {
+  const base64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64;
+  if (!base64) {
+    throw new Error("GOOGLE_SERVICE_ACCOUNT_BASE64 env var is missing");
   }
 
-  // Handle both single-line and multi-line keys
-  const parsedKey = privateKey.replace(/\\n/g, "\n");
+  const jsonStr = Buffer.from(base64, "base64").toString("utf-8");
+  const parsed = JSON.parse(jsonStr);
+
+  if (!parsed.client_email || !parsed.private_key) {
+    throw new Error("Service account JSON missing client_email or private_key");
+  }
+
+  return {
+    client_email: parsed.client_email,
+    private_key: parsed.private_key,
+  };
+}
+
+function getJwtClient() {
+  const { client_email, private_key } = getServiceAccountCredentials();
+
+  // If Google adds escaped \n inside the JSON, normalize just in case
+  const key = private_key.replace(/\\n/g, "\n");
 
   return new google.auth.JWT({
-    email: clientEmail,
-    key: parsedKey,
+    email: client_email,
+    key,
     scopes: SCOPES,
   });
 }
@@ -38,7 +59,7 @@ export async function GET() {
     const now = new Date();
     const timeMin = now.toISOString();
 
-    // Example: next 24 hours
+    // Next 24 hours — adjust if you want a wider range
     const timeMaxDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const timeMax = timeMaxDate.toISOString();
 
@@ -58,10 +79,8 @@ export async function GET() {
         const start = event.start?.dateTime || event.start?.date || "";
         const end = event.end?.dateTime || event.end?.date || "";
 
-        // Prefer the hangout/meet link; fall back to htmlLink if needed
         const meetLink =
-          (event.conferenceData?.entryPoints || [])
-            .find((e) => e.uri)?.uri ||
+          (event.conferenceData?.entryPoints || []).find((e) => e.uri)?.uri ||
           event.hangoutLink ||
           event.htmlLink ||
           "";
@@ -76,7 +95,17 @@ export async function GET() {
         };
       });
 
-    return NextResponse.json({ meetings });
+    const todayStr = new Date().toDateString();
+    const filteredMeetings = meetings.filter((m) => {
+      const d = new Date(m.start);
+      return (
+        !isNaN(d.getTime()) &&
+        d.toDateString() === todayStr &&
+        m.title !== "Boardroom Gmeet"
+      );
+    });
+
+    return NextResponse.json({ meetings: filteredMeetings });
   } catch (error: any) {
     console.error("Error fetching calendar events:", error);
     return NextResponse.json(
