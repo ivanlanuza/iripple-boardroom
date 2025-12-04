@@ -136,18 +136,6 @@ export default function Home() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-2 flex justify-end">
-              <Button
-                size="icon"
-                variant="outline"
-                className="border-slate-700 bg-slate-900 text-slate-50 hover:bg-slate-800 hover:text-slate-200"
-                onClick={fetchMeetings}
-                disabled={loading}
-              >
-                <RefreshCcw className="h-4 w-4" />
-              </Button>
-            </div>
-
             <div className="mt-4 space-y-3">
               {loading && (
                 <div className="text-sm text-slate-400">
@@ -198,6 +186,18 @@ export default function Home() {
                     </Button>
                   </div>
                 ))}
+            </div>
+
+                        <div className="mt-2 flex justify-end">
+              <Button
+                size="icon"
+                variant="outline"
+                className="border-slate-700 bg-slate-900 text-slate-50 hover:bg-slate-800 hover:text-slate-200"
+                onClick={fetchMeetings}
+                disabled={loading}
+              >
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
