@@ -29,6 +29,7 @@ export default function Home() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [serverTime, setServerTime] = useState<string | null>(null);
 
   const handleJoin = (url: string) => {
     if (!url) return;
@@ -47,6 +48,13 @@ export default function Home() {
 
       const data = await res.json();
       setMeetings(data.meetings || []);
+      setServerTime(
+        new Date().toLocaleTimeString("en-PH", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
     } catch (err: any) {
       console.error(err);
       setError("Could not load upcoming meetings.");
@@ -88,17 +96,17 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-slate-950 px-4">
-      <h1 className="text-3xl md:text-4xl font-semibold mb-10 text-center text-slate-50">
-        Welcome to iRipple Boardroom
+      <h1 className="text-6xl md:text-6xl font-semibold mb-10 text-center text-slate-50">
+        iRipple + MySuki Boardroom
       </h1>
 
 
-      <div className="flex flex-col md:flex-row gap-4 w-2/3 ">
+      <div className="flex flex-col gap-4 w-1/3 mx-auto pt-16">
         {/* GMeet */}
         <Button
           asChild
           variant="outline"
-          className="flex-1 text-base py-6 bg-slate-900/60 border-slate-700 text-slate-50 hover:bg-slate-800 hover:text-slate-400"
+          className="text-base py-8 bg-slate-900/60 border-slate-700 text-slate-50 hover:bg-slate-800 hover:text-slate-400"
         >
           <a href={GMEET_URL} target="_blank" rel="noopener noreferrer">
             Use Boardroom Gmeet Link
@@ -109,7 +117,7 @@ export default function Home() {
         <Button
           asChild
           variant="outline"
-          className="flex-1 text-base py-6 bg-slate-900/60 border-slate-700 text-slate-50 hover:bg-slate-800 hover:text-slate-400"
+          className="text-base py-8 bg-slate-900/60 border-slate-700 text-slate-50 hover:bg-slate-800 hover:text-slate-400"
         >
           <a href={ZOOM_URL} target="_blank" rel="noopener noreferrer">
             Use Boardroom Zoom Link
@@ -120,10 +128,10 @@ export default function Home() {
         <Dialog>
           <DialogTrigger asChild>
             <Button
-              variant="outline"
-              className="flex-1 text-base py-6 bg-slate-900/60 border-slate-700 text-slate-50 hover:bg-slate-800 hover:text-slate-400"
+              variant="link"
+              className="text-base py-6  text-slate-50  hover:text-slate-400"
             >
-              Use own invite link
+              Use your own link
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-slate-950 border-slate-800 text-slate-50">
@@ -188,7 +196,10 @@ export default function Home() {
                 ))}
             </div>
 
-                        <div className="mt-2 flex justify-end">
+            <div className="mt-4 flex items-center justify-between">
+              <span className="text-xs text-slate-400">
+                Server time: {serverTime ?? "--:--:--"}
+              </span>
               <Button
                 size="icon"
                 variant="outline"
