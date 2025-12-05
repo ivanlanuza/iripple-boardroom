@@ -165,7 +165,9 @@ export default function Home() {
 
               {!loading &&
                 !error &&
-                meetings.map((meeting) => (
+                meetings
+                  .filter((m) => m.id != "4u6bvhn87ev59t47tcc5hs6ouc_20251205")
+                  .map((meeting) => (
                   <div
                     key={meeting.id}
                     className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-100 px-4 py-3"
