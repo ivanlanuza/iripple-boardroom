@@ -100,6 +100,10 @@ export default function Home() {
         iRipple + MySuki Boardroom
       </h1>
 
+      <h1 className="text-2xl md:text-2xl font-light mb-10 -mt-6 text-center text-slate-50">
+        wwww.boardroom.iripple.com
+      </h1>
+
 
       <div className="flex flex-col gap-4 w-1/3 mx-auto pt-16">
         {/* GMeet */}
