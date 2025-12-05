@@ -161,7 +161,7 @@ export default function Home() {
                 </div>
               )}
 
-              {!loading && !error && meetings.length === 0 && (
+              {!loading && !error && meetings.filter((m) => m.id != "4u6bvhn87ev59t47tcc5hs6ouc_20251205").length === 0 && (
                 <div className="text-sm text-slate-400">
                   No upcoming meetings found in the next 24 hours.
                 </div>
@@ -204,7 +204,7 @@ export default function Home() {
 
             <div className="mt-4 flex items-center justify-between">
               <span className="text-xs text-slate-400">
-                Server time: {serverTime ?? "--:--:--"}
+                {/*Server time: {serverTime ?? "--:--:--"}*/}
               </span>
               <Button
                 size="icon"
