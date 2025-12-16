@@ -101,7 +101,7 @@ export default function Home() {
       </h1>
 
       <h1 className="text-2xl md:text-2xl font-light mb-10 -mt-6 text-center text-slate-50">
-        wwww.boardroom.iripple.com
+        https://boardroom.iripple.com
       </h1>
 
 
