@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import type { calendar_v3 } from "googleapis";
 
 export const runtime = "nodejs"; // ensure Node runtime, not Edge
 
@@ -54,7 +55,7 @@ export async function GET() {
     }
 
     const auth = getJwtClient();
-    const calendar = google.calendar({ version: "v3", auth });
+    const calendar = google.calendar({ version: "v3", auth }) as calendar_v3.Calendar;
 
     const now = new Date();
     const timeMin = now.toISOString();
@@ -63,15 +64,30 @@ export async function GET() {
     const timeMaxDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const timeMax = timeMaxDate.toISOString();
 
-    const res = await calendar.events.list({
+    const params = {
       calendarId,
       timeMin,
       timeMax,
       singleEvents: true,
       orderBy: "startTime",
-    });
+      // Some googleapis TS defs don't include this even though the API supports it
+      conferenceDataVersion: 1,
+    } as any as calendar_v3.Params$Resource$Events$List;
 
-    const events = res.data.items || [];
+    const res = (await calendar.events.list(
+      params
+    )) as unknown as { data: calendar_v3.Schema$Events };
+
+    const events = (res.data.items ?? []) as calendar_v3.Schema$Event[];
+
+    const ZOOM_REGEX =
+      /https?:\/\/([a-z0-9-]+\.)?zoom\.us\/(j\/\d+|my\/[A-Za-z0-9._-]+)(\?[^ \n\r\t]*)?/i;
+
+    const extractZoomLink = (text: string) => {
+      if (!text) return "";
+      const match = text.match(ZOOM_REGEX);
+      return match ? match[0] : "";
+    };
 
     const meetings = events
       .filter((event) => !!event.start)
@@ -79,9 +95,16 @@ export async function GET() {
         const start = event.start?.dateTime || event.start?.date || "";
         const end = event.end?.dateTime || event.end?.date || "";
 
+        const combinedText = [event.summary, event.location, event.description]
+          .filter(Boolean)
+          .join("\n");
+
+        const zoomLink = extractZoomLink(combinedText);
+
         const meetLink =
           (event.conferenceData?.entryPoints || []).find((e) => e.uri)?.uri ||
           event.hangoutLink ||
+          zoomLink ||
           event.htmlLink ||
           "";
 
